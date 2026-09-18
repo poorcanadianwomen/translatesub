@@ -12,6 +12,9 @@ fi
 
 source "$VENV/bin/activate"
 
+# Prevent av from loading its bundled opus (conflicts with Discord's)
+export AV_NO_OPUS=1
+
 # Defaults
 TOKEN=""
 CHANNEL=""

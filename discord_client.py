@@ -1,5 +1,6 @@
 import asyncio
 import threading
+import struct
 import discord
 from discord.ext import native_voice
 
@@ -17,7 +18,9 @@ class DiscordVoiceClient:
         self._loop = None
         self._thread = None
         self._decoders = {}
+        self._decoder_locks = {}
         self._user_cache = {}
+        self._global_lock = threading.Lock()
 
     def start(self):
         self._thread = threading.Thread(target=self._run, daemon=True)
@@ -96,12 +99,11 @@ class DiscordVoiceClient:
         user_id = packet.user_id
         opus_data = packet.payload
 
-        if not opus_data:
+        if not opus_data or len(opus_data) < 4:
             return
 
         try:
-            decoder = self._get_decoder(user_id)
-            pcm = decoder.decode(opus_data)
+            pcm = self._decode_opus(user_id, opus_data)
         except Exception:
             return
 
@@ -118,10 +120,12 @@ class DiscordVoiceClient:
             username = self._get_username(user_id)
             self.on_audio(user_id, audio, username)
 
-    def _get_decoder(self, user_id):
-        if user_id not in self._decoders:
-            self._decoders[user_id] = discord.opus.Decoder()
-        return self._decoders[user_id]
+    def _decode_opus(self, user_id, opus_data):
+        with self._global_lock:
+            if user_id not in self._decoders:
+                self._decoders[user_id] = discord.opus.Decoder()
+            decoder = self._decoders[user_id]
+            return decoder.decode(opus_data)
 
     async def _disconnect(self):
         if self._voice:

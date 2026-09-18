@@ -3,6 +3,8 @@ import sys
 import argparse
 import threading
 
+os.environ["AV_NO_OPUS"] = "1"
+
 if not os.environ.get("QT_QPA_PLATFORM"):
     os.environ["QT_QPA_PLATFORM"] = "xcb"
 
