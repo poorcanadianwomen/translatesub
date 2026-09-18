@@ -1,0 +1,57 @@
+#!/bin/bash
+# TranslateSub launcher
+APPDIR="$(dirname "$(readlink -f "$0")")"
+VENV="$APPDIR/.venv"
+CONFIG="$HOME/.config/translatesub.json"
+
+if [ ! -d "$VENV" ]; then
+    echo "No venv found at $VENV"
+    echo "Run: cd $APPDIR && uv venv && source .venv/bin/activate && uv pip install -r requirements.txt"
+    exit 1
+fi
+
+source "$VENV/bin/activate"
+
+# Defaults
+TOKEN=""
+CHANNEL=""
+TARGET="en"
+MODEL="base"
+
+# Load config file if it exists
+if [ -f "$CONFIG" ]; then
+    TOKEN=$(python3 -c "import json; print(json.load(open('$CONFIG')).get('token',''))" 2>/dev/null)
+    CHANNEL=$(python3 -c "import json; print(json.load(open('$CONFIG')).get('channel',0))" 2>/dev/null)
+    TARGET=$(python3 -c "import json; print(json.load(open('$CONFIG')).get('target','en'))" 2>/dev/null)
+    MODEL=$(python3 -c "import json; print(json.load(open('$CONFIG')).get('model','base'))" 2>/dev/null)
+fi
+
+# CLI args override config
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --token) TOKEN="$2"; shift 2;;
+        --channel) CHANNEL="$2"; shift 2;;
+        --target) TARGET="$2"; shift 2;;
+        --model) MODEL="$2"; shift 2;;
+        --config) CONFIG="$2"; shift 2;;
+        --setup) bash "$APPDIR/config.sh" --set; exit 0;;
+        *) shift;;
+    esac
+done
+
+# Env vars override everything
+TOKEN="${TRANSLATESUB_TOKEN:-$TOKEN}"
+CHANNEL="${TRANSLATESUB_CHANNEL:-$CHANNEL}"
+TARGET="${TRANSLATESUB_TARGET:-$TARGET}"
+MODEL="${TRANSLATESUB_MODEL:-$MODEL}"
+
+if [ -z "$TOKEN" ] || [ -z "$CHANNEL" ] || [ "$CHANNEL" = "0" ]; then
+    echo "TranslateSub - Discord Voice Translator"
+    echo ""
+    echo "No config found. Run: translatesub-launcher --setup"
+    echo ""
+    echo "Or: translatesub-launcher --token TOKEN --channel CHANNEL_ID"
+    exit 0
+fi
+
+exec python3 "$APPDIR/main.py" --token "$TOKEN" --channel "$CHANNEL" --target "$TARGET" --model "$MODEL"

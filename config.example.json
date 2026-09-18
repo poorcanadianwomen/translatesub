@@ -1,0 +1,6 @@
+{
+    "token": "YOUR_DISCORD_TOKEN_HERE",
+    "channel": 0,
+    "target": "en",
+    "model": "base"
+}

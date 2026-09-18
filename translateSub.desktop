@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=TranslateSub
+Comment=Real-time Discord voice translator
+Exec=/home/lexiear/translatesub/translatesub-launcher
+Icon=/home/lexiear/translatesub/icon.svg
+Terminal=false
+Type=Application
+Categories=Utility;Audio;Network;
+Keywords=discord;translate;voice;subtitles;
+StartupNotify=false

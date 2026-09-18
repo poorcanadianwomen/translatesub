@@ -1,0 +1,9 @@
+numpy>=2.0.0
+faster-whisper>=1.1.0
+translators>=6.0.0
+PyQt6>=6.7.0
+onnxruntime>=1.17.0
+torch>=2.0.0
+torchaudio>=2.0.0
+"discord.py-self[voice]>=2.2.0"
+discord-native-voice>=0.1.0
